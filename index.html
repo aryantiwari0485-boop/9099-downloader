@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="hi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b0b0d">
+  <meta name="description" content="9099 Downloader — अनुमति-प्राप्त direct video links को सेव करने के लिए सरल टूल।">
+  <title>9099 Downloader</title>
+  <style>
+    :root { color-scheme: dark; --bg:#09090b; --panel:#141418; --red:#ff2638; --muted:#aaaab4; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif; color:#f7f7fa; background:radial-gradient(ellipse at top,#2a0b10 0,#09090b 48%); }
+    header { padding:24px 18px 10px; text-align:center; }
+    .logo { display:inline-grid; place-items:center; width:58px; height:58px; border:2px solid var(--red); border-radius:18px; color:var(--red); font-weight:900; font-size:17px; box-shadow:0 0 28px #ff263822; }
+    h1 { margin:13px 0 5px; font-size:clamp(27px,7vw,38px); letter-spacing:-1px; }
+    h1 span { color:var(--red); }
+    .tagline { margin:0 auto; max-width:520px; color:var(--muted); line-height:1.55; font-size:14px; }
+    main { width:min(100% - 28px,560px); margin:24px auto 36px; }
+    .card { background:linear-gradient(160deg,#19191f,#111114); border:1px solid #333039; border-radius:20px; padding:20px; box-shadow:0 18px 55px #0007; }
+    label { display:block; margin:0 0 9px; font-size:14px; font-weight:700; }
+    input { width:100%; min-height:52px; border:1px solid #45434c; background:#09090c; color:white; border-radius:12px; padding:13px 14px; font-size:15px; outline:none; }
+    input:focus { border-color:var(--red); box-shadow:0 0 0 3px #ff263822; }
+    button { width:100%; min-height:51px; border:0; border-radius:12px; margin-top:12px; padding:13px 16px; background:var(--red); color:white; font-size:16px; font-weight:800; cursor:pointer; }
+    button:active { transform:scale(.99); }
+    .hint { color:var(--muted); font-size:12px; line-height:1.5; margin:11px 2px 0; }
+    #status { display:none; margin-top:14px; padding:12px; border-radius:10px; font-size:14px; line-height:1.5; overflow-wrap:anywhere; }
+    #status.show { display:block; background:#20151a; border:1px solid #66313a; }
+    .steps { margin-top:16px; color:#d6d4dc; font-size:13px; line-height:1.65; }
+    .steps strong { color:white; }
+    footer { text-align:center; color:#85838d; padding:0 18px 26px; font-size:12px; }
+    a { color:#ff6673; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo" aria-label="9099">9099</div>
+    <h1><span>9099</span> Downloader</h1>
+    <p class="tagline">अपने या अनुमति-प्राप्त वीडियो लिंक को फोन में सेव करने के लिए सरल टूल।</p>
+  </header>
+  <main>
+    <section class="card">
+      <label for="videoUrl">Direct video URL यहाँ पेस्ट करें</label>
+      <input id="videoUrl" type="url" inputmode="url" autocomplete="url" placeholder="https://example.com/video.mp4" aria-describedby="hint">
+      <button id="downloadBtn" type="button">⬇ Download Video</button>
+      <p id="hint" class="hint">यह शुरुआती वर्जन सीधे .mp4, .webm या .ogg वीडियो फ़ाइल के लिंक के लिए है। YouTube/Instagram के शेयर लिंक यहाँ सीधे डाउनलोड नहीं होंगे।</p>
+      <div id="status" role="status" aria-live="polite"></div>
+      <div class="steps">
+        <strong>कैसे इस्तेमाल करें</strong><br>
+        1. अनुमति-प्राप्त direct video file का लिंक कॉपी करें।<br>
+        2. ऊपर वाले बॉक्स में पेस्ट करें।<br>
+        3. Download Video दबाएँ। अगर डाउनलोड शुरू न हो, तो वेबसाइट/सर्वर उस फ़ाइल को डाउनलोड करने की अनुमति नहीं दे रहा हो सकता है।
+      </div>
+    </section>
+  </main>
+  <footer>9099 Downloader · केवल वही वीडियो सेव करें जिन्हें डाउनलोड करने की अनुमति आपके पास है।</footer>
+  <script>
+    const input = document.getElementById('videoUrl');
+    const button = document.getElementById('downloadBtn');
+    const statusBox = document.getElementById('status');
+
+    function showStatus(message) {
+      statusBox.textContent = message;
+      statusBox.classList.add('show');
+    }
+
+    button.addEventListener('click', () => {
+      const raw = input.value.trim();
+      if (!raw) {
+        showStatus('पहले वीडियो फ़ाइल का लिंक पेस्ट करें।');
+        input.focus();
+        return;
+      }
+      let url;
+      try { url = new URL(raw); } catch {
+        showStatus('यह लिंक सही नहीं लग रहा। पूरा https:// वाला URL पेस्ट करें।');
+        return;
+      }
+      if (url.protocol !== 'https:' && url.protocol !== 'http:') {
+        showStatus('सिर्फ http:// या https:// लिंक इस्तेमाल करें।');
+        return;
+      }
+      const path = url.pathname.toLowerCase();
+      if (!/\.(mp4|webm|ogg|ogv|mov|m4v)$/.test(path)) {
+        showStatus('यह direct video file लिंक नहीं दिख रहा। ऐसा लिंक इस्तेमाल करें जिसका पता वीडियो फ़ाइल (जैसे .mp4) पर खत्म होता हो। YouTube/Instagram share links इस शुरुआती वर्जन में समर्थित नहीं हैं।');
+        return;
+      }
+      const a = document.createElement('a');
+      a.href = url.href;
+      a.download = path.split('/').pop() || 'video';
+      a.rel = 'noopener noreferrer';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      showStatus('डाउनलोड अनुरोध भेज दिया गया। अगर फ़ाइल सेव नहीं होती, तो वीडियो होस्ट की cross-origin या download अनुमति की पाबंदी हो सकती है।');
+    });
+  </script>
+</body>
+</html>
